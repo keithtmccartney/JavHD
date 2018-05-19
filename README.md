@@ -9,7 +9,7 @@ JavHD free trail video downloader
 
 ## Usage
 
-`$ go get https://github.com/rebill/JavHD`
+`$ go get github.com/rebill/JavHD`
 
 * default download floder: `videos`
 * default source: `1080p`
