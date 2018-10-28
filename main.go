@@ -23,8 +23,8 @@ var sources = map[string]int{
 	"1080p": 4000,
 }
 
-func download(id string) {
-	partName := fmt.Sprintf("%s/%s.mp4", videoDownloadFloder, id)
+func download(id string, title string) {
+	partName := fmt.Sprintf("%s/%s (%s).mp4", videoDownloadFloder, id, title)
 	if _, err := os.Stat(partName); err == nil {
 		log.Info("video file exists: ", id)
 		return
@@ -120,10 +120,11 @@ func main() {
 	// On every a element which has href attribute call callback
 	c.OnHTML(".thumb-content a", func(e *colly.HTMLElement) {
 		id := e.Attr("clickitem")
-		download(id)
+		title := e.Attr("title")
+		download(id, title)
 	})
 
-	urlFmt := "https://javhd.com/zh/japanese-porn-videos/justadded/all/%d"
+	urlFmt := "https://javhd.com/en/japanese-porn-videos/justadded/all/%d"
 	for i := 1; i <= 30; i++ {
 		c.Visit(fmt.Sprintf(urlFmt, i))
 	}
