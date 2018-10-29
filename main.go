@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gocolly/colly"
-	"github.com/gocolly/colly/extensions"
 	log "github.com/sirupsen/logrus"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
@@ -86,7 +84,7 @@ func download(id string, title string) {
 }
 
 func main() {
-	// Instantiate default collector
+	/*// Instantiate default collector
 	c := colly.NewCollector(
 	// colly.Async(true),
 	)
@@ -130,5 +128,14 @@ func main() {
 	}
 
 	// Wait until threads are finished
-	c.Wait()
+	c.Wait()*/
+
+	argsWithProg := os.Args
+	argsWithoutProg := os.Args[1:]
+
+	arg := os.Args[3]
+
+	fmt.Println(argsWithProg)
+	fmt.Println(argsWithoutProg)
+	fmt.Println(arg)
 }

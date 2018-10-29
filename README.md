@@ -20,4 +20,5 @@ JavHD free trail video downloader
 
 ## Get Going
 
-`* $ go run main.go`
+* running the package with - `$ go run main.go` - it's getting interesting...
+* learning command-line arguments in Go with [GoByExample](https://gobyexample.com/command-line-arguments); built a binary with - `$ go build main.go` - and printed-out sample arguments with - `$ ./command-line-arguments a b c d`; it's getting more interesting...
