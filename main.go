@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gocolly/colly"
+	"github.com/gocolly/colly/extensions"
 	log "github.com/sirupsen/logrus"
 	pb "gopkg.in/cheggaaa/pb.v1"
 )
@@ -19,6 +21,17 @@ var sources = map[string]int{
 	"480p":  1000,
 	"720p":  2000,
 	"1080p": 4000,
+}
+
+func arguments() {
+	argsWithProg := os.Args
+	argsWithoutProg := os.Args[1:]
+
+	arg := os.Args[3]
+
+	fmt.Println(argsWithProg)
+	fmt.Println(argsWithoutProg)
+	fmt.Println(arg)
 }
 
 func download(id string, title string) {
@@ -83,8 +96,70 @@ func download(id string, title string) {
 	bar.FinishPrint("Done: " + id)
 }
 
+func downloadfreezone(id string, title string) {
+	partName := fmt.Sprintf("%s/%s (%s).mp4", videoDownloadFloder, id, title)
+	if _, err := os.Stat(partName); err == nil {
+		log.Info("video file exists: ", id)
+		return
+	}
+
+	url := fmt.Sprintf("https://c1.cdnjav.com/share/trailers/%s/1min_%d.mp4", id, sources[defaultSource])
+	fmt.Println("Downloading: ", url)
+
+	// get file size
+	headResp, err := http.Head(url)
+	if err != nil {
+		log.Errorf("failed to get header: %s", id)
+		return
+	}
+	defer headResp.Body.Close()
+
+	size, err := strconv.Atoi(headResp.Header.Get("Content-Length"))
+
+	if err != nil {
+		log.Errorf("failed to get Content-Length: %s", id)
+		return
+	}
+
+	// start progress bar
+	bar := pb.New(size)
+	bar.SetRefreshRate(time.Second)
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
+
+	// create get request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Errorf("failed to split NewRequest for get: %s", id)
+		return
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Errorf("failed to get requests: %s", id)
+		return
+	}
+	defer res.Body.Close()
+
+	output, err := os.OpenFile(partName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Errorf("failed to create %s", partName)
+		return
+	}
+	defer output.Close()
+
+	// create proxy reader
+	reader := bar.NewProxyReader(res.Body)
+
+	// and copy from pb reader
+	io.Copy(output, reader)
+
+	bar.FinishPrint("Done: " + id)
+}
+
 func main() {
-	/*// Instantiate default collector
+	// Instantiate default collector
 	c := colly.NewCollector(
 	// colly.Async(true),
 	)
@@ -119,23 +194,25 @@ func main() {
 	c.OnHTML(".thumb-content a", func(e *colly.HTMLElement) {
 		id := e.Attr("clickitem")
 		title := e.Attr("title")
-		download(id, title)
+
+		// Call the 'japanese-porn-videos' page
+		/*download(id, title)*/
+
+		// Call the 'freezone' page
+		// On every a element which has href attribute call callback
+		downloadfreezone(id, title)
 	})
 
+	// Call the 'japanese-porn-videos' page
 	urlFmt := "https://javhd.com/en/japanese-porn-videos/justadded/all/%d"
+
+	// Call the 'freezone' page
+	/*urlFmt := "https://javhd.com/en/freezone"*/
+
 	for i := 1; i <= 30; i++ {
 		c.Visit(fmt.Sprintf(urlFmt, i))
 	}
 
 	// Wait until threads are finished
-	c.Wait()*/
-
-	argsWithProg := os.Args
-	argsWithoutProg := os.Args[1:]
-
-	arg := os.Args[3]
-
-	fmt.Println(argsWithProg)
-	fmt.Println(argsWithoutProg)
-	fmt.Println(arg)
+	c.Wait()
 }
